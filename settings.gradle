@@ -1,0 +1,6 @@
+rootProject.name = 'account'
+
+include 'discovery-service'
+include 'gateway-service'
+include 'account-service'
+
