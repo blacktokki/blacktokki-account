@@ -35,5 +35,5 @@ echo "jwt.secret=$3" >> $SECRET_FILE
 # sudo npm install -g concurrently expo-cli
 # npm --prefix $FRONTEND_DIRECTORY install
 # echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
-
+sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 9000
 read -p "Press enter to continue"

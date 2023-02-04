@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Usage:
-# bash scripts/runserver.sh [param]...
+# bash scripts/stopserver.sh [param]...
 # * param: service name (discovery|gateway|account)
 
 for var in "$@"
@@ -10,9 +10,8 @@ do
   if [ -n "$PID" ]
   then
     echo "=====$var is running at" $PID
+    kill -9 $PID
   else
-    ./gradlew build -p $var-service
     echo "=====$var isn't running====="
-    nohup java -jar **/build/libs/$var-service*.war >/dev/null 2>&1 &
   fi
 done
