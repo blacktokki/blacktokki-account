@@ -68,6 +68,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             // .antMatchers("/user/join/social/**").authenticated()
             .antMatchers(resourceArray).permitAll()
             .antMatchers("/**/csrf/").permitAll()
+            .antMatchers("/**/sso/refresh/").permitAll()
             .anyRequest().authenticated()
             //.antMatchers("/**").permitAll()
         // .and()
