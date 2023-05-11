@@ -116,7 +116,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         config.setAllowedMethods(Collections.singletonList(ALL));
         config.setAllowedHeaders(Collections.singletonList(ALL));
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList("http://localhost:19006", "http://localhost:9000"));
+        config.setAllowedOrigins(Arrays.asList("http://localhost:19006", "http://localhost:9000", "https://blacktokki.github.io"));
         config.setMaxAge(1800L);
         source.registerCorsConfiguration("/**", config);
         return source;
