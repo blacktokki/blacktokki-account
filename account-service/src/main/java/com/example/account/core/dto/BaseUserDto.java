@@ -10,7 +10,7 @@ import lombok.Data;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BaseUserDto implements Serializable{
-    protected long id;
+    protected Long id;
     protected String username;
     protected String name;
     protected Boolean isAdmin;

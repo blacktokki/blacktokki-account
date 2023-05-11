@@ -6,6 +6,7 @@ import java.lang.reflect.Type;
 
 import javax.annotation.PostConstruct;
 
+import com.example.account.core.dto.BulkUpdateDto;
 import com.example.account.core.dto.GenericSpecification;
 import com.example.account.core.dto.PageResponseDto;
 import com.example.account.core.service.GenericService;
@@ -70,8 +71,8 @@ public abstract class GenericController<T, B, Q extends GenericSpecification<T>,
     }
 
     @PatchMapping("/")
-    public ResponseEntity<B> bulkUpdateFields(@RequestBody List<ID> ids, @RequestBody B updated){
-        return ResponseEntity.ok(service.bulkUpdateFields(ids, updated));
+    public ResponseEntity<B> bulkUpdateFields(@RequestBody BulkUpdateDto<B, ID> updated){
+        return ResponseEntity.ok(service.bulkUpdateFields(updated.getIds(), updated.getUpdated()));
     }
 
     @DeleteMapping("/{id}")

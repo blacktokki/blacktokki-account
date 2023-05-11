@@ -24,4 +24,8 @@ public class UserDto extends BaseUserDto{
     public void setPassword(String password){
         this.password = password;
     }
+
+    public String toString(){
+        return super.toString();
+    }
 }

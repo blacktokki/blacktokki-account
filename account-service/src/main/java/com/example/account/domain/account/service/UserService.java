@@ -1,7 +1,7 @@
 package com.example.account.domain.account.service;
 
-import com.example.account.core.entity.AbstractUser;
-import com.example.account.core.service.AuthenticationService;
+import com.example.account.core.dto.AuthenticateDto;
+import com.example.account.core.service.CustomUserDetailsService;
 import com.example.account.core.service.GenericService;
 import com.example.account.domain.account.dto.UserDto;
 import com.example.account.domain.account.dto.UserSpecification;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class UserService extends GenericService<User, UserDto, Long> implements AuthenticationService{
+public class UserService extends GenericService<User, UserDto, Long> implements CustomUserDetailsService{
     @Autowired
     GroupRepository groupRepository;
 
@@ -24,15 +24,16 @@ public class UserService extends GenericService<User, UserDto, Long> implements 
     MembershipRepository membershipRepository;
 
     @Override
-    public User findByUsername(String username){
+    public AuthenticateDto loadUserByUsername(String username){
         UserSpecification accountUserSpecification = new UserSpecification();
         accountUserSpecification.setUsername(username);
-        return specificationExecutor.findOne(accountUserSpecification).orElse(null);
+        User user = specificationExecutor.findOne(accountUserSpecification).orElse(null);
+        return user != null ? modelMapper.map(user, AuthenticateDto.class) : null;
     }
     
     @Override
     @Transactional
-    public AbstractUser createGuestUser(String username){
+    public AuthenticateDto createGuestUser(String username){
         String[] split = username.split("@"); 
         User user = new User();
         user.setUsername(username);
@@ -42,7 +43,7 @@ public class UserService extends GenericService<User, UserDto, Long> implements 
         user.setName("guest:" + split[0]);
         user = repository.save(user);
         createMember(user, split[1]);
-        return user;
+        return modelMapper.map(user, AuthenticateDto.class);
     }
 
     @Override

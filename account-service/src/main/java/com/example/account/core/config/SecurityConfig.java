@@ -21,6 +21,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 // import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 // import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
 // import org.springframework.security.oauth2.client.registration.ClientRegistration;
 // import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -36,6 +37,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     
     @Autowired
     AuthProvider authProvider;
+
+    @Autowired
+    JwtTokenProvider jwtTokenProvider;
     
     // @Autowired
     // private CaptchaAuthenticationDetailsSource captchaWebAuthenticationDetailsSource;
@@ -80,6 +84,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         //     .baseUri("/user/oauth2/authorization")
         //     .and()
         .and()
+            .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
             // 로그인 페이지 및 성공 url, handler 그리고 로그인 시 사용되는 id, password 파라미터 정의
             .formLogin()
             //.authenticationDetailsSource(captchaWebAuthenticationDetailsSource)
