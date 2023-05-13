@@ -44,8 +44,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     // @Autowired
     // private CaptchaAuthenticationDetailsSource captchaWebAuthenticationDetailsSource;
     
-    @Autowired
-    private AuthFailureHandler authFailureHandler;
+    // @Autowired
+    // private AuthFailureHandler authFailureHandler;
  
     @Autowired
     private AuthSuccessHandler authSuccessHandler;
@@ -91,7 +91,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             //.loginPage("/login")
             // .defaultSuccessUrl("/")
             .successHandler(authSuccessHandler)
-            .failureHandler(authFailureHandler)
+            // .failureHandler(authFailureHandler)
         .and()
             // 로그아웃 관련 설정
             .logout().logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
