@@ -41,7 +41,7 @@ public class AuthProvider implements AuthenticationProvider  {
             String guestDomain = createGuestDomain();
             if (user == null || !username.split("@")[1].equals(guestDomain)){
                 System.out.println("invalid guest");
-                throw new UsernameNotFoundException("가입하지 않은 아이디이거나, 잘못된 비밀번호입니다.");
+                throw new UsernameNotFoundException("Unregistered user or incorrect password.");
             }
         }
         else if (isGuestCreate){
@@ -59,7 +59,7 @@ public class AuthProvider implements AuthenticationProvider  {
         // id에 맞는 user가 없거나 비밀번호가 맞지 않는 경우.
         if (user == null || !user.getPassword().equals(password)) {
         	System.out.println("notexist");
-        	throw new UsernameNotFoundException("가입하지 않은 아이디이거나, 잘못된 비밀번호입니다.");
+        	throw new UsernameNotFoundException("Unregistered user or incorrect password.");
         }    
         return new UsernamePasswordAuthenticationToken(user, user.getPassword(), user.getAuthorities());
     }
