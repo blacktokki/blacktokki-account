@@ -12,6 +12,8 @@ import com.example.account.domain.account.repository.GroupRepository;
 import com.example.account.domain.account.repository.MembershipRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,13 @@ public class UserService extends GenericService<User, UserDto, Long> implements 
 
     @Autowired
     MembershipRepository membershipRepository;
+
+    PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    public void setPasswordEncoder(@Lazy PasswordEncoder passwordEncoder){
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public AuthenticateDto loadUserByUsername(String username){
@@ -37,7 +46,7 @@ public class UserService extends GenericService<User, UserDto, Long> implements 
         String[] split = username.split("@"); 
         User user = new User();
         user.setUsername(username);
-        user.setPassword("guest");
+        user.setPassword(passwordEncoder.encode("guest"));
         user.setIsGuest(true);
         user.setIsAdmin(true);
         user.setName("guest:" + split[0]);
@@ -50,6 +59,7 @@ public class UserService extends GenericService<User, UserDto, Long> implements 
     @Transactional
     public UserDto create(UserDto newDomain) {
         User user = toEntity(newDomain);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         user = repository.save(user);
         createMember(user, user.getUsername().split("@")[1]);
         return toDto(user);

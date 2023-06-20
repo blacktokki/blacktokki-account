@@ -9,10 +9,12 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.example.account.core.service.CustomUserDetailsService;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.security.authentication.AuthenticationProvider;
 // import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,14 +22,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
-import org.springframework.stereotype.Component;
 
-@Component("authProvider")
+@RequiredArgsConstructor
 public class AuthProvider implements AuthenticationProvider  {
 
-    @Autowired(required = false)
-    private CustomUserDetailsService service;
+    private final CustomUserDetailsService service;
+
+    private final PasswordEncoder passwordEncoder;
     
     @Override
     @Transactional
@@ -40,8 +43,7 @@ public class AuthProvider implements AuthenticationProvider  {
         if (isGuestLogin){
             String guestDomain = createGuestDomain();
             if (user == null || !username.split("@")[1].equals(guestDomain)){
-                System.out.println("invalid guest");
-                throw new UsernameNotFoundException("Unregistered user or incorrect password.");
+                throw new UsernameNotFoundException("Invalid guest user.");
             }
         }
         else if (isGuestCreate){
@@ -57,7 +59,7 @@ public class AuthProvider implements AuthenticationProvider  {
         System.out.println(user.getPassword());
         System.out.println(password);
         // id에 맞는 user가 없거나 비밀번호가 맞지 않는 경우.
-        if (user == null || !user.getPassword().equals(password)) {
+        if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
         	System.out.println("notexist");
         	throw new UsernameNotFoundException("Unregistered user or incorrect password.");
         }    

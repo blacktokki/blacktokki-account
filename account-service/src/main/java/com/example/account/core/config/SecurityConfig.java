@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import com.example.account.core.security.*;
+import com.example.account.core.service.CustomUserDetailsService;
 
 // import java.util.List;
 // import java.util.Objects;
@@ -16,11 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 // import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationProvider;
 // import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 // import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 // import org.springframework.security.config.oauth2.client.CommonOAuth2Provider;
 // import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -36,7 +39,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     
     @Autowired
-    AuthProvider authProvider;
+    CustomUserDetailsService service;
 
     @Autowired
     JwtTokenProvider jwtTokenProvider;
@@ -103,7 +106,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .csrf().ignoringAntMatchers("/api/v1/**")
         .and()
             // 로그인 프로세스가 진행될 provider
-            .authenticationProvider(authProvider)
+            .authenticationProvider(authenticationProvider())
             .exceptionHandling().accessDeniedHandler(customAccessDeniedHandler)
         .and()
             .cors(withDefaults());
@@ -121,6 +124,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         source.registerCorsConfiguration("/**", config);
         return source;
     }
+
+    @Bean
+    BCryptPasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        return new AuthProvider(service, passwordEncoder());
+    }
+
     /*
     @Bean
     public ClientRegistrationRepository clientRegistrationRepository(OAuth2ClientProperties oAuth2ClientProperties, @Value("${custom.oauth2.kakao.client-id}") String kakaoClientId) {
