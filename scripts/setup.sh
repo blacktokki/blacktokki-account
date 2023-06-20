@@ -7,6 +7,7 @@
 # * param3: database password, secret key
 
 DATASOURCE_FILE=./account-service/src/main/resources/datasource.properties
+MYSQL_CONFIG_FILE=/etc/mysql./my.cnf
 SECRET_FILE=./account-service/src/main/resources/secret.properties
 FRONTEND_DIRECTORY=./frontend
 
@@ -25,15 +26,19 @@ create database db1_account;
 "
 
 sudo apt-get --assume-yes install openjdk-11-jdk
+sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 9000
+
 echo "spring.datasource.url=jdbc:mysql://127.0.0.1:3306/?rewriteBatchedStatements=true&characterEncoding=UTF-8" > $DATASOURCE_FILE  # &profileSQL=true&logger=Slf4JLogger&maxQuerySizeToLog=999999
 echo "spring.datasource.username=$2" >> $DATASOURCE_FILE
 echo "spring.datasource.password=$3" >> $DATASOURCE_FILE
 echo "jwt.secret=$3" >> $SECRET_FILE
 
-# curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-# sudo apt-get --assume-yes install nodejs
-# sudo npm install -g concurrently expo-cli
-# npm --prefix $FRONTEND_DIRECTORY install
-# echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
-sudo iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 9000
+## replication DB
+echo "[mysqld]" >> $MYSQL_CONFIG_FILE
+echo "log-bin=/var/log/mysql/mysql-bin.log" >> $MYSQL_CONFIG_FILE
+echo "server-id=1" >> $MYSQL_CONFIG_FILE
+echo "expire_logs_days=7" >> $MYSQL_CONFIG_FILE
+echo "bind-address=0.0.0.0" >> $MYSQL_CONFIG_FILE
+sudo systemctl restart mysql
+
 read -p "Press enter to continue"

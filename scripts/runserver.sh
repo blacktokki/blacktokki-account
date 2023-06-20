@@ -11,7 +11,7 @@ do
   then
     echo "=====$var is running at" $PID
   else
-    ./gradlew build -p $var-service
+    # ./gradlew build -p $var-service
     echo "=====$var isn't running====="
     nohup java -jar **/build/libs/$var-service*.war >/dev/null 2>&1 &
   fi
