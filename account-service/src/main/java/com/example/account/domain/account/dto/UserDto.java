@@ -14,6 +14,9 @@ public class UserDto extends BaseUserDto{
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private Long inviteGroupId;
+
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private List<GroupDto> groupList;
 
@@ -23,6 +26,10 @@ public class UserDto extends BaseUserDto{
 
     public void setPassword(String password){
         this.password = password;
+    }
+
+    public void setInviteGroupId(Long groupId){
+        this.inviteGroupId = groupId;
     }
 
     public String toString(){

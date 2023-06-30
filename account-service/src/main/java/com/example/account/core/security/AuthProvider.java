@@ -1,17 +1,9 @@
 package com.example.account.core.security;
 
-import java.util.Optional;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
-import javax.servlet.http.HttpServletRequest;
 
 import com.example.account.core.service.CustomUserDetailsService;
 
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import lombok.RequiredArgsConstructor;
 
@@ -37,20 +29,11 @@ public class AuthProvider implements AuthenticationProvider  {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String username = authentication.getName();
         String password = (String)authentication.getCredentials();
-        Boolean isGuestLogin = username.endsWith(".guest") && password.equals("guest");
         Boolean isGuestCreate = username.equals("guest") && password.equals("guest");
         UserDetails user = service.loadUserByUsername(username);
-        if (isGuestLogin){
-            String guestDomain = createGuestDomain();
-            if (user == null || !username.split("@")[1].equals(guestDomain)){
-                throw new UsernameNotFoundException("Invalid guest user.");
-            }
-        }
-        else if (isGuestCreate){
+        if (isGuestCreate){
             WebAuthenticationDetails details = (WebAuthenticationDetails)authentication.getDetails();
-            String sessionId = details.getSessionId().substring(0, 8);
-            String guestDomain = createGuestDomain();
-            username = sessionId + "@" + guestDomain;
+            username = details.getSessionId().substring(0, 10) + "@*.guest";
             user =  service.loadUserByUsername(username);
             if(user == null){
                 user = service.createGuestUser(username);
@@ -71,20 +54,4 @@ public class AuthProvider implements AuthenticationProvider  {
         return authentication.equals(UsernamePasswordAuthenticationToken.class);
     }
 
-    private String createGuestDomain(){
-            HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
-            String address = Optional.ofNullable(request.getHeader("x-forwarded-for")).orElse(request.getRemoteAddr());
-            String userAgent = request.getHeader("user-agent");
-            String guestDomain = "";
-            try {
-                MessageDigest md = MessageDigest.getInstance("MD5");
-                String hash = (new BigInteger(1, md.digest(address.getBytes())).add(
-                    new BigInteger(1,md.digest(userAgent.getBytes())))).toString(36);
-                guestDomain = hash.substring(hash.length() - 12) + ".guest";
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            }
-            return guestDomain;
-    }
- 
 }
