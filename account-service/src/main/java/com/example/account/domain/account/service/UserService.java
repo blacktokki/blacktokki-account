@@ -1,6 +1,7 @@
 package com.example.account.domain.account.service;
 
 import java.math.BigInteger;
+import java.util.List;
 
 import com.example.account.core.dto.AuthenticateDto;
 import com.example.account.core.service.CustomUserDetailsService;
@@ -53,35 +54,48 @@ public class UserService extends GenericService<User, UserDto, Long> implements 
         user.setName("Guest" + new BigInteger(1, username.getBytes()).toString().substring(0, 4));
         user = repository.save(user);
         Group group = groupRepository.findByName(username);
-        createMember(user, group, username);
+        createMember(user.getId(), group, username);
         return modelMapper.map(user, AuthenticateDto.class);
     }
 
     @Override
     @Transactional
     public UserDto create(UserDto newUser) {
-        User user = toEntity(newUser);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user = repository.save(user);
+        String password = newUser.getPassword();
+        newUser.setPassword(passwordEncoder.encode(password));
+        UserDto user = super.create(newUser);
+        newUser.setPassword(password);
         String defaultGroupName = user.getUsername() + "'s group";
         if (newUser.getInviteGroupId() != null){
             Group group = groupRepository.getById(newUser.getInviteGroupId());
-            createMember(user, group, defaultGroupName);
+            createMember(user.getId(), group, defaultGroupName);
         }
         else{
-            createMember(user, null, defaultGroupName);
+            createMember(user.getId(), null, defaultGroupName);
         }
-        return toDto(user);
+        return user;
     }
 
-    private void createMember(User user, Group group, String groupName){
+    @Override
+    @Transactional
+    public UserDto bulkUpdateFields(List<Long> ids, UserDto updated) {
+        String password = updated.getPassword();
+        if(password!=null && password.length() > 0){
+            updated.setPassword(passwordEncoder.encode(password));
+        }
+        UserDto result = super.bulkUpdateFields(ids, updated);
+        updated.setPassword(password);
+        return result;
+    }
+
+    private void createMember(Long userId, Group group, String groupName){
         if (group == null){
             group = new Group();
             group.setName(groupName);
             group = groupRepository.save(group);
         }
         Membership membership = new Membership();
-        membership.setUserId(user.getId());
+        membership.setUserId(userId);
         membership.setGroupId(group.getId());
         membershipRepository.save(membership);
     }
