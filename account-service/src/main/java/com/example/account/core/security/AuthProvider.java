@@ -39,11 +39,8 @@ public class AuthProvider implements AuthenticationProvider  {
                 user = service.createGuestUser(username);
             }  
         }
-        System.out.println(user.getPassword());
-        System.out.println(password);
         // id에 맞는 user가 없거나 비밀번호가 맞지 않는 경우.
         if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
-        	System.out.println("notexist");
         	throw new UsernameNotFoundException("Unregistered user or incorrect password.");
         }    
         return new UsernamePasswordAuthenticationToken(user, user.getPassword(), user.getAuthorities());

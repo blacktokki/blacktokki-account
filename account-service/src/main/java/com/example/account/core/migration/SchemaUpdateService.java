@@ -63,7 +63,6 @@ public class SchemaUpdateService implements InitializingBean {
         File tempFile = new File(tempFileName);
         String directoryPath = (userDir.endsWith("account-service/")?userDir:userDir + "account-service/") + "src/main/resources/db/migration/";
         String path =  directoryPath + applicationName + "/";
-        System.out.println(path);
         File[] fileList = new File(path).listFiles();
         Flyway flyway = Flyway.configure().dataSource(dataSource).schemas(schemaName).load();
         int sqlFileCount = fileList.length;

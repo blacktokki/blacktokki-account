@@ -1,6 +1,7 @@
 package com.example.account.core.security;
 
 import java.io.IOException;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuthSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
  
+	Logger logger = Logger.getGlobal();
+
 	// private UserService userService;
 	
 	@Override // disable redirect
@@ -23,7 +26,7 @@ public class AuthSuccessHandler extends SavedRequestAwareAuthenticationSuccessHa
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
             Authentication authentication) throws ServletException, IOException {
-    	System.out.println("suc");
+    	logger.info("login success");
     	// userService.clearFailureCount(LoginUser.getId());
     	// userService.visit(LoginUser.getId());
     	super.onAuthenticationSuccess(request, response, authentication);
