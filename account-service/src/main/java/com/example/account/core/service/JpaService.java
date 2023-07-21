@@ -5,8 +5,6 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
 import com.example.account.core.config.CustomJsr310Module;
 import com.example.account.core.dto.PageResponseDto;
 
@@ -23,60 +21,60 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.transaction.annotation.Transactional;
 
-public abstract class GenericService<T, B, ID> {
+public abstract class JpaService<T, E, ID> implements RestService<T, Specification<E>, ID>{
     @Autowired
-    protected JpaRepository<T, ID> repository;
+    protected JpaRepository<E, ID> repository;
 
     @Autowired
-    protected JpaSpecificationExecutor<T> specificationExecutor;
+    protected JpaSpecificationExecutor<E> specificationExecutor;
+
+    protected Type[] typeList = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments();
 
     protected final ModelMapper modelMapper = new ModelMapper();
 
     protected final ModelMapper notNullModelMapper = new ModelMapper();
-
-    private final CustomJsr310Module customJsr310Module = new CustomJsr310Module();
-
-    protected Type[] typeList = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments();
     
-    @PostConstruct
-    public void postConstruct(){
+    {
+        CustomJsr310Module customJsr310Module = new CustomJsr310Module();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
         modelMapper.registerModule(customJsr310Module);
         notNullModelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
         notNullModelMapper.registerModule(customJsr310Module);
     }
 
-    public PageResponseDto<B> getPage(Pageable pageable, Specification<T> spec){
-        Page<T> result = specificationExecutor.findAll(spec, pageable);
-        Page<B> mappedResult = result.map((data)->toDto(data));
-        return new PageResponseDto<B>(mappedResult);
+    @Override
+    public PageResponseDto<T> getPage(Pageable pageable, Specification<E> spec){
+        Page<E> result = specificationExecutor.findAll(spec, pageable);
+        Page<T> mappedResult = result.map((data)->toDto(data));
+        return new PageResponseDto<T>(mappedResult);
     }
 
-    public List<B> getList(Specification<T> spec, Sort sort){
-        List<T> result = specificationExecutor.findAll(spec, sort);
+    @Override
+    public List<T> getList(Specification<E> spec, Sort sort){
+        List<E> result = specificationExecutor.findAll(spec, sort);
         return result.stream().map((data)->toDto(data)).collect(Collectors.toList());
     }
 
-    public B get(ID id){
+    public T get(ID id){
         return toDto(repository.findById(id).get());
     }
 
     @Transactional
-    public B update(ID id, B updated){
-        B dto = get(id);
+    public T update(ID id, T updated){
+        T dto = get(id);
         try {
             BeanUtils.copyProperties(updated, dto);
         }
         catch (Exception e) {
         }
-        T saved = this.repository.save(toEntity(dto));
+        E saved = this.repository.save(toEntity(dto));
         return toDto(saved);
     }
 
     @Transactional
-    public B bulkUpdateFields(List<ID> ids, B updated) {
-        List<T> entityList = repository.findAllById(ids);
-        for (T entity: entityList){
+    public T bulkUpdateFields(List<ID> ids, T updated) {
+        List<E> entityList = repository.findAllById(ids);
+        for (E entity: entityList){
             notNullModelMapper.map(updated, entity);
         }
         repository.saveAll(entityList);
@@ -84,7 +82,7 @@ public abstract class GenericService<T, B, ID> {
     }
 
     @Transactional
-    public B create(B newDomain){
+    public T create(T newDomain){
         return toDto(repository.save(toEntity(newDomain)));
     }
 
@@ -100,10 +98,10 @@ public abstract class GenericService<T, B, ID> {
         repository.deleteAllById(ids);  
     }
 
-    protected B toDto(T t){
-        return modelMapper.map(t, typeList[1]);
+    protected T toDto(E t){
+        return modelMapper.map(t, typeList[0]);
     }
-    protected T toEntity(B b){
-        return modelMapper.map(b, typeList[0]);
+    protected E toEntity(T b){
+        return modelMapper.map(b, typeList[1]);
     }
 }

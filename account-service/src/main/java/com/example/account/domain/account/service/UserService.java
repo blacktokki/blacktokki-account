@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.example.account.core.dto.AuthenticateDto;
 import com.example.account.core.service.CustomUserDetailsService;
-import com.example.account.core.service.GenericService;
+import com.example.account.core.service.JpaService;
 import com.example.account.domain.account.dto.UserDto;
 import com.example.account.domain.account.dto.UserSpecification;
 import com.example.account.domain.account.entity.Group;
@@ -20,15 +20,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @Service
-public class UserService extends GenericService<User, UserDto, Long> implements CustomUserDetailsService{
-    @Autowired
-    GroupRepository groupRepository;
+public class UserService extends JpaService<UserDto, User, Long> implements CustomUserDetailsService{
+    private final GroupRepository groupRepository;
 
-    @Autowired
-    MembershipRepository membershipRepository;
+    private final MembershipRepository membershipRepository;
 
-    PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
     
     @Autowired
     public void setPasswordEncoder(@Lazy PasswordEncoder passwordEncoder){
