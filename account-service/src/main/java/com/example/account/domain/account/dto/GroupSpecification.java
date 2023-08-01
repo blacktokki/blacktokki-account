@@ -1,7 +1,5 @@
 package com.example.account.domain.account.dto;
 
-import java.util.List;
-
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -18,7 +16,9 @@ public class GroupSpecification extends GenericSpecification<Group>{
     private Long rootId;
 
     @Override
-    protected void toPredicate(List<Predicate> predicates, Root<Group> root, CriteriaBuilder builder){
-        toPredicateField(predicates, "rootId", rootId, root, builder);
+    protected Predicate[] toPredicates(Root<Group> root, CriteriaBuilder builder){
+        return new Predicate[]{
+            toPredicateField("rootId", rootId, root, builder)
+        };
     }
 }

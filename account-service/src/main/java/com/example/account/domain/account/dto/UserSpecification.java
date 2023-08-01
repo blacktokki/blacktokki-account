@@ -1,7 +1,5 @@
 package com.example.account.domain.account.dto;
 
-import java.util.List;
-
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -27,13 +25,15 @@ public class UserSpecification extends GenericSpecification<User>{
     private Boolean self;
 
     @Override
-    protected void toPredicate(List<Predicate> predicates, Root<User> root, CriteriaBuilder builder){
+    protected Predicate[] toPredicates(Root<User> root, CriteriaBuilder builder){
         Join<User, Group> g = root.join("groupList", JoinType.LEFT);
         if(self != null && self){
             this.username = ((BaseUserDto)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
         }
-        toPredicateField(predicates, "username", username, root, builder);
-        toPredicateField(predicates, "name", name, root, builder);
-        toPredicateField(predicates, "id", groupId, g, builder);
+        return new Predicate[]{
+            toPredicateField("username", username, root, builder),
+            toPredicateField("name", name, root, builder),
+            toPredicateField("id", groupId, g, builder)
+        };
     }
 }

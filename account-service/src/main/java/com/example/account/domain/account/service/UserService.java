@@ -40,7 +40,7 @@ public class UserService extends JpaService<UserDto, User, Long> implements Cust
     public AuthenticateDto loadUserByUsername(String username){
         UserSpecification accountUserSpecification = new UserSpecification();
         accountUserSpecification.setUsername(username);
-        User user = specificationExecutor.findOne(accountUserSpecification).orElse(null);
+        User user = getExecutor().findOne(accountUserSpecification).orElse(null);
         return user != null ? modelMapper.map(user, AuthenticateDto.class) : null;
     }
     

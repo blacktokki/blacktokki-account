@@ -1,8 +1,5 @@
 package com.example.account.core.dto;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
@@ -13,28 +10,29 @@ import org.springframework.data.jpa.domain.Specification;
 
 public abstract class GenericSpecification<T> implements Specification<T>{
     public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
-        List<Predicate> predicates = new ArrayList<Predicate>();
-        toPredicate(predicates, root, builder);
-        if (predicates.size() > 0){
-            return builder.and(predicates.toArray(new Predicate[0]));
+        Predicate[] predicates = toPredicates(root, builder);
+        if (predicates.length > 0){
+            return builder.and(predicates);
         }
         return null;
     }
 
-    abstract protected void toPredicate(List<Predicate> predicates, Root<T> root, CriteriaBuilder builder);
+    abstract protected Predicate[] toPredicates(Root<T> root, CriteriaBuilder builder);
 
-    protected void toPredicateField(List<Predicate> predicates, String key, Object value, Path<?> path, CriteriaBuilder builder){
+    protected Predicate toPredicateField(String key, Object value, Path<?> path, CriteriaBuilder builder){
         if (value != null){
-            predicates.add(builder.equal(path.get(key), value));
+            return builder.equal(path.get(key), value);
         }
+        return null;
     }
 
-    protected void toPredicateFieldIsNull(List<Predicate> predicates, String key, Boolean value, Path<?> path, CriteriaBuilder builder){
+    protected Predicate toPredicateFieldIsNull(String key, Boolean value, Path<?> path, CriteriaBuilder builder){
         if (value != null){
             if (value)
-                predicates.add(builder.isNull(path.get(key)));
+                return builder.isNull(path.get(key));
             else
-                predicates.add(builder.isNotNull(path.get(key)));
+                return builder.isNotNull(path.get(key));
         }
+        return null;
     }
 }

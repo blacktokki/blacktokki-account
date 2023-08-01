@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.example.account.core.dto.BulkUpdateDto;
 import com.example.account.core.dto.PageResponseDto;
-import com.example.account.core.service.RestService;
+import com.example.account.core.service.RestfulService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -17,13 +17,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-public abstract class RestController<T, Q, ID> {
+public abstract class RestfulController<T, Q, ID> {
     @Autowired(required = false)
-    protected RestService<T, ? super Q, ID> service;
+    protected RestfulService<T, ? super Q, ID> service;
 
     @GetMapping("")
     public ResponseEntity<PageResponseDto<T>> getPage(Pageable pageable, Q queryParam){
-        return ResponseEntity.ok(service.getPage(pageable, queryParam));
+        return ResponseEntity.ok(service.getPage(queryParam, pageable));
     }
 
     @GetMapping("/{id}")

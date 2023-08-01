@@ -7,10 +7,10 @@ import com.example.account.core.dto.PageResponseDto;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-public interface RestService<T, S, ID> {
-    public PageResponseDto<T> getPage(Pageable pageable, S spec);
+public interface RestfulService<T, P, ID> {
+    public PageResponseDto<T> getPage(P param, Pageable pageable);
 
-    public List<T> getList(S spec, Sort sort);
+    public List<T> getList(P param, Sort sort);
 
     public T get(ID id);
 

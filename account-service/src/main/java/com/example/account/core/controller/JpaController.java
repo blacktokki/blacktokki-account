@@ -12,12 +12,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public abstract class JpaController<T, E, Q extends Specification<E>, ID> extends RestController<T, Q, ID>{
+public abstract class JpaController<T, E, Q extends Specification<E>, ID> extends RestfulController<T, Q, ID>{
     @Autowired
     protected JpaRepository<E, ID> repository;
 
     @Autowired
-    protected JpaSpecificationExecutor<E> specificationExecutor;
+    protected JpaSpecificationExecutor<E> executor;
     
     private Type[] typeList = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments();
 
@@ -27,7 +27,7 @@ public abstract class JpaController<T, E, Q extends Specification<E>, ID> extend
             service = new JpaService<T, E, ID>(){
                 {
                     this.repository = JpaController.this.repository;
-                    this.specificationExecutor = JpaController.this.specificationExecutor;
+                    this.executor = JpaController.this.executor;
                     this.typeList = JpaController.this.typeList;
                 }
             };
