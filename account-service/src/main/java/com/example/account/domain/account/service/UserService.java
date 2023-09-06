@@ -3,9 +3,16 @@ package com.example.account.domain.account.service;
 import java.math.BigInteger;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+
 import com.example.account.core.dto.AuthenticateDto;
+import com.example.account.core.dto.BaseUserDto;
 import com.example.account.core.service.CustomUserDetailsService;
-import com.example.account.core.service.JpaService;
+import com.example.account.core.service.restful.JpaService;
 import com.example.account.domain.account.dto.UserDto;
 import com.example.account.domain.account.dto.UserSpecification;
 import com.example.account.domain.account.entity.Group;
@@ -16,6 +23,7 @@ import com.example.account.domain.account.repository.MembershipRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,10 +46,10 @@ public class UserService extends JpaService<UserDto, User, Long> implements Cust
 
     @Override
     public AuthenticateDto loadUserByUsername(String username){
-        UserSpecification accountUserSpecification = new UserSpecification();
-        accountUserSpecification.setUsername(username);
-        User user = getExecutor().findOne(accountUserSpecification).orElse(null);
-        return user != null ? modelMapper.map(user, AuthenticateDto.class) : null;
+        UserSpecification userSpecification = new UserSpecification();
+        userSpecification.setUsername(username);
+        User user = getExecutor().findOne(toSpecification(userSpecification)).orElse(null);
+        return user != null ? getModelMapper().map(user, AuthenticateDto.class) : null;
     }
     
     @Override
@@ -53,10 +61,10 @@ public class UserService extends JpaService<UserDto, User, Long> implements Cust
         user.setIsGuest(true);
         user.setIsAdmin(true);
         user.setName("Guest" + new BigInteger(1, username.getBytes()).toString().substring(0, 4));
-        user = repository.save(user);
+        user = getRepository().save(user);
         Group group = groupRepository.findByName(username);
         createMember(user.getId(), group, username);
-        return modelMapper.map(user, AuthenticateDto.class);
+        return getModelMapper().map(user, AuthenticateDto.class);
     }
 
     @Override
@@ -99,5 +107,21 @@ public class UserService extends JpaService<UserDto, User, Long> implements Cust
         membership.setUserId(userId);
         membership.setGroupId(group.getId());
         membershipRepository.save(membership);
+    }
+
+    @Override
+    public Predicate toPredicate(String key, Object value, Root<User> root, CriteriaBuilder builder){
+        if (value == null){
+            return null;
+        }
+        Join<User, Group> g = root.join("groupList", JoinType.LEFT);
+        if (key.equals("self") && (Boolean)value){
+            String username = ((BaseUserDto)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+            return builder.equal(root.get(key), username);
+        }
+        if (key.equals("groupId")){
+            return builder.equal(g.get(key), value);
+        }
+        return builder.equal(root.get(key), value);
     }
 }

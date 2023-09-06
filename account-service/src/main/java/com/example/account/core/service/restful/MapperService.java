@@ -1,4 +1,4 @@
-package com.example.account.core.service;
+package com.example.account.core.service.restful;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -9,12 +9,15 @@ import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 
+import lombok.Getter;
+
+@Getter
 public abstract class MapperService<T, E>{
-    protected Type[] typeList = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments();
+    private Type[] typeList = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments();
 
-    protected final ModelMapper modelMapper = new ModelMapper();
+    private final ModelMapper modelMapper = new ModelMapper();
 
-    protected final ModelMapper notNullModelMapper = new ModelMapper();
+    private final ModelMapper notNullModelMapper = new ModelMapper();
     
     {
         CustomJsr310Module customJsr310Module = new CustomJsr310Module();

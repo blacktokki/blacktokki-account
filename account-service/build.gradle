@@ -59,6 +59,7 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
+//querydsl 추가 시작
 def querydslDir = "$buildDir/generated/querydsl"
 querydsl {
    jpa = true
@@ -70,6 +71,19 @@ sourceSets {
 configurations {
    querydsl.extendsFrom compileClasspath
 }
-compileQuerydsl {
-   options.annotationProcessorPath = configurations.querydsl
+configurations {
+	compileOnly {
+      extendsFrom annotationProcessor
+   }
+   querydsl.extendsFrom compileClasspath
 }
+
+// querydsl for vscode
+gradle.taskGraph.afterTask { Task task, TaskState state ->
+	if(task.name == "nothing"){
+		exec{
+			commandLine "bash", "scripts/postBuildConfiguration.sh"
+		}
+	}
+}
+//querydsl 추가 끝

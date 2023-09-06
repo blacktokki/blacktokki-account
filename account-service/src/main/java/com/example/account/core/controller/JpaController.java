@@ -3,34 +3,39 @@ package com.example.account.core.controller;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-import javax.annotation.PostConstruct;
-
-import com.example.account.core.service.JpaService;
+import com.example.account.core.service.restful.JpaService;
+import com.example.account.core.service.restful.RestfulService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public abstract class JpaController<T, E, Q extends Specification<E>, ID> extends RestfulController<T, Q, ID>{
+import lombok.Getter;
+
+public abstract class JpaController<T, E, Q, ID> extends RestfulController<T, Q, ID>{
     @Autowired
-    protected JpaRepository<E, ID> repository;
+    private JpaRepository<E, ID> repository;
 
     @Autowired
-    protected JpaSpecificationExecutor<E> executor;
+    private JpaSpecificationExecutor<E> executor;
     
-    private Type[] typeList = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments();
+    private final Type[] typeList = ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments();
 
-    @PostConstruct
-    public void postConstruct(){
-        if (service==null){
-            service = new JpaService<T, E, ID>(){
-                {
-                    this.repository = JpaController.this.repository;
-                    this.executor = JpaController.this.executor;
-                    this.typeList = JpaController.this.typeList;
-                }
-            };
+    @Getter
+    private final RestfulService<T, ID> service = new JpaService<T, E, ID>(){
+        @Override
+        public JpaRepository<E, ID> getRepository(){
+            return JpaController.this.repository;
         }
-    }
+
+        @Override
+        public JpaSpecificationExecutor<E> getExecutor(){
+            return JpaController.this.executor;
+        }
+
+        @Override
+        public Type[] getTypeList(){
+            return JpaController.this.typeList;
+        }
+    };
 }
