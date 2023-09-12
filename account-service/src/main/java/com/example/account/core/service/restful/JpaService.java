@@ -3,26 +3,12 @@ package com.example.account.core.service.restful;
 import java.util.List;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.Getter;
 
 @Getter
-public abstract class JpaService<T, E, ID> extends MapperService<T, E> implements RestfulService<T, ID>, SpecificationService<T, E>{
-    @Autowired
-    private JpaRepository<E, ID> repository;
-
-    @Autowired
-    private JpaSpecificationExecutor<E> executor;
-
-    @Override
-    public T get(ID id){
-        return toDto(getRepository().findById(id).get());
-    }
-
+public abstract class JpaService<T, E, ID> extends JpaQueryService<T, E, ID> implements CommandService<T, ID>{
     @Override
     @Transactional
     public T update(ID id, T updated){

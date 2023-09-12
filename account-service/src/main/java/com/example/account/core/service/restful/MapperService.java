@@ -27,7 +27,11 @@ public abstract class MapperService<T, E>{
         notNullModelMapper.registerModule(customJsr310Module);
     }
 
-    public T toDto(E t){
+    protected Class<?> getEntityClass(){
+        return (Class<?>)typeList[1];
+    }
+
+    public T toDto(Object t){
         return modelMapper.map(t, typeList[0]);
     }
     public E toEntity(T b){
