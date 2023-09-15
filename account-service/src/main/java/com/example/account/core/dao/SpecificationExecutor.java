@@ -16,21 +16,19 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface SpecificationExecutor<T> extends JpaSpecificationExecutor<T>, QueryExecutor<T, Predicate>{
     @Override
-    default Page<? extends T> findAll(Object param, Pageable pageable) {
+    default Page<T> findAll(Object param, Pageable pageable) {
         return findAll(toSpecification(param), pageable);
     }
 
     @Override
-    default Iterable<? extends T> findAll(Object param, Sort sort) {
+    default Iterable<T> findAll(Object param, Sort sort) {
         return findAll(toSpecification(param), sort);
     }
 
     @Override
-    default Optional<? extends T> findOne(Object param) {
+    default Optional<T> findOne(Object param) {
         return findOne(toSpecification(param));
     }
-
-
     
     default Predicate toPredicate(String key, Object value, Root<T> root, CriteriaBuilder builder){
         if (value == null){

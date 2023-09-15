@@ -2,17 +2,25 @@ package com.example.account.core.service.restful;
 
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import lombok.Getter;
+public interface JpaCommandService<T, E, ID> extends CommandService<T, ID> {
+    public JpaRepository<E, ID> getRepository();
 
-@Getter
-public abstract class JpaService<T, E, ID> extends JpaQueryService<T, E, ID> implements CommandService<T, ID>{
+    public ModelMapper getNotNullModelMapper();
+
+
+    public T toDto(E e);
+
+    public E toEntity(T t);
+
     @Override
     @Transactional
-    public T update(ID id, T updated){
-        T dto = get(id);
+    default T update(ID id, T updated){
+        T dto = toDto(getRepository().findById(id).get());
         try {
             BeanUtils.copyProperties(updated, dto);
         }
@@ -24,7 +32,7 @@ public abstract class JpaService<T, E, ID> extends JpaQueryService<T, E, ID> imp
 
     @Override
     @Transactional
-    public T bulkUpdateFields(List<ID> ids, T updated) {
+    default T bulkUpdateFields(List<ID> ids, T updated) {
         List<E> entityList = getRepository().findAllById(ids);
         for (E entity: entityList){
             getNotNullModelMapper().map(updated, entity);
@@ -35,19 +43,20 @@ public abstract class JpaService<T, E, ID> extends JpaQueryService<T, E, ID> imp
 
     @Override
     @Transactional
-    public T create(T newDomain){
+    default T create(T newDomain){
         return toDto(getRepository().save(toEntity(newDomain)));
     }
 
     @Override
     @Transactional
-    public void delete(ID id){
+    default void delete(ID id){
         getRepository().deleteById(id);
     }
 
     @Override
     @Transactional
-    public void bulkDelete(List<ID> ids) {
+    default void bulkDelete(List<ID> ids) {
         getRepository().deleteAllById(ids);  
     }
+
 }

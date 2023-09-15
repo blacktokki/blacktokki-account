@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.example.account.core.dto.AuthenticateDto;
 import com.example.account.core.service.CustomUserDetailsService;
-import com.example.account.core.service.restful.JpaService;
+import com.example.account.core.service.restful.RestfulService;
 import com.example.account.domain.account.dto.UserDto;
 import com.example.account.domain.account.dto.UserSpecification;
 import com.example.account.domain.account.entity.Group;
@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
-public class UserService extends JpaService<UserDto, User, Long> implements CustomUserDetailsService{
+public class UserService extends RestfulService<UserDto, User, Long> implements CustomUserDetailsService{
     private final GroupRepository groupRepository;
 
     private final MembershipRepository membershipRepository;

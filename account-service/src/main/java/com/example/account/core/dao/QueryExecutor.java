@@ -14,13 +14,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 public interface QueryExecutor<T, P> {
-    Page<? extends T> findAll(Object param, Pageable pageable);
+    Page<T> findAll(Object param, Pageable pageable);
 
-    Iterable<? extends T> findAll(Object param, Sort sort);
+    Iterable<T> findAll(Object param, Sort sort);
 
-    Optional<? extends T> findOne(Object param);
+    Optional<T> findOne(Object param);
 
-    default Stream<? extends P> toPredicates(Object param, BiFunction<String, Object, P> callback) {
+    default Stream<P> toPredicates(Object param, BiFunction<String, Object, P> callback) {
         try {
             return Arrays.stream(Introspector.getBeanInfo(param.getClass()).getPropertyDescriptors()).map(pd -> {
                 if (pd.getReadMethod() != null && !"class".equals(pd.getName())) {

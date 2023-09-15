@@ -10,7 +10,6 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
-import org.springframework.core.ResolvableType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -18,38 +17,38 @@ import org.springframework.data.domain.Sort.Order;
 import org.springframework.data.querydsl.SimpleEntityPathResolver;
 import org.springframework.data.support.PageableExecutionUtils;
 
-public interface QuerydslExecutor<T> extends QueryExecutor<Object, Predicate> {
+public interface QuerydslExecutor<T> extends QueryExecutor<T, Predicate> {
     default JPAQueryFactory getFactory() {
         return null;
     }
 
-    default Class<?> getEntityClass() {
-        return ResolvableType.forClass(QuerydslExecutor.class, getClass()).getGeneric(0).resolve();
+    default Class<T> getEntityClass() {
+        return null;
     }
 
     @Override
-    default Page<? extends Object> findAll(Object param, Pageable pageable) {
-        EntityPathBase<?> root = getEntityPathBase();
-        JPAQuery<?> query = createQuery(param).offset(pageable.getOffset()).limit(pageable.getPageSize());
-        JPAQuery<?> countQuery = getFactory().select(root.count()).from(root);
+    default Page<T> findAll(Object param, Pageable pageable) {
+        EntityPathBase<T> root = getEntityPathBase();
+        JPAQuery<T> query = createQuery(param).offset(pageable.getOffset()).limit(pageable.getPageSize());
+        JPAQuery<Long> countQuery = getFactory().select(root.count()).from(root);
         addOrderBy(pageable.getSort(), query);
-        return PageableExecutionUtils.getPage(query.fetch(), pageable, () -> (Long) countQuery.fetchOne());
+        return PageableExecutionUtils.getPage(query.fetch(), pageable, () -> countQuery.fetchOne());
     }
 
     @Override
-    default Iterable<? extends Object> findAll(Object param, Sort sort) {
-        JPAQuery<?> query = createQuery(param);
+    default Iterable<T> findAll(Object param, Sort sort) {
+        JPAQuery<T> query = createQuery(param);
         addOrderBy(sort, query);
         return query.fetch();
     }
 
     @Override
-    default Optional<? extends Object> findOne(Object param) {
+    default Optional<T> findOne(Object param) {
         return Optional.ofNullable(createQuery(param).limit(2).fetchOne());
     }
 
-    default EntityPathBase<?> getEntityPathBase() {
-        return (EntityPathBase<?>) SimpleEntityPathResolver.INSTANCE.createPath(getEntityClass());
+    default EntityPathBase<T> getEntityPathBase() {
+        return (EntityPathBase<T>) SimpleEntityPathResolver.INSTANCE.createPath(getEntityClass());
     }
 
     default void addOrderBy(Sort sort, JPAQuery<?> query) {
@@ -67,8 +66,8 @@ public interface QuerydslExecutor<T> extends QueryExecutor<Object, Predicate> {
         return null;
     }
 
-    default JPAQuery<?> createQuery(Object param) {
-        EntityPathBase<?> root = getEntityPathBase();
+    default JPAQuery<T> createQuery(Object param) {
+        EntityPathBase<T> root = getEntityPathBase();
         Predicate[] predicates = toPredicates(param, QuerydslExecutor.this::toPredicate).toArray(Predicate[]::new);
         return getFactory().selectFrom(root).where(predicates);
     }
