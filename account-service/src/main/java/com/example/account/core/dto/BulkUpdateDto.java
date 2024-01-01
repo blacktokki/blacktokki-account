@@ -4,13 +4,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.io.Serializable;
 import java.util.List;
 
 @Getter
 @Setter
 @NoArgsConstructor
-public class BulkUpdateDto<T, ID> implements Serializable {
+public class BulkUpdateDto<T, ID> {
     private List<ID> ids;
     private T updated;
 }

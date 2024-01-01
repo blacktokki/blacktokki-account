@@ -4,11 +4,10 @@ import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.domain.Page;
 
-import java.io.Serializable;
 import java.util.List;
 
 @Getter
-public class PageResponseDto<T> implements Serializable {
+public class PageResponseDto<T> {
 
     private List<T> value;
     private int count;

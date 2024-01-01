@@ -1,6 +1,5 @@
 package com.example.account.core.dto;
 
-import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -9,7 +8,7 @@ import lombok.Data;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class BaseUserDto implements Serializable{
+public class BaseUserDto{
     protected Long id;
     protected String username;
     protected String name;

@@ -1,10 +1,9 @@
 package com.example.account.domain.account.dto;
 
-import java.io.Serializable;
 
 import lombok.Data;
 
 @Data
-public class StorageDto implements Serializable{
+public class StorageDto{
     private String fileName;
 }

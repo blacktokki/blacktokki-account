@@ -1,6 +1,5 @@
 package com.example.account.domain.account.dto;
 
-import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,7 +11,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = false)
 public class GroupMembershipDto extends GroupDto{
     @Data
-    static public class MembershipDto implements Serializable{
+    static public class MembershipDto{
         private Long id;
         private Long userId;
         private Long groupId;
