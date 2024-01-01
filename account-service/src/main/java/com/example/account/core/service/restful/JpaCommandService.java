@@ -3,7 +3,6 @@ package com.example.account.core.service.restful;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.BeanUtils;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -12,21 +11,18 @@ public interface JpaCommandService<T, E, ID> extends CommandService<T, ID> {
 
     public ModelMapper getNotNullModelMapper();
 
-
     public T toDto(E e);
 
     public E toEntity(T t);
 
+    public void setEntityId(E entity, ID id);
+
     @Override
     @Transactional
     default T update(ID id, T updated){
-        T dto = toDto(getRepository().findById(id).get());
-        try {
-            BeanUtils.copyProperties(updated, dto);
-        }
-        catch (Exception e) {
-        }
-        E saved = getRepository().save(toEntity(dto));
+        E entity = toEntity(updated);
+        setEntityId(entity, id);
+        E saved = getRepository().save(entity);
         return toDto(saved);
     }
 
@@ -56,7 +52,7 @@ public interface JpaCommandService<T, E, ID> extends CommandService<T, ID> {
     @Override
     @Transactional
     default void bulkDelete(List<ID> ids) {
-        getRepository().deleteAllById(ids);  
+        getRepository().deleteAllByIdInBatch(ids);
     }
 
 }

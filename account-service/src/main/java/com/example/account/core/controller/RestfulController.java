@@ -49,7 +49,7 @@ public abstract class RestfulController<T, Q, ID> {
         return ResponseEntity.ok(getCommandService().update(id, updated));
     }
 
-    @PatchMapping("/")
+    @PatchMapping("")
     public ResponseEntity<T> bulkUpdateFields(@RequestBody BulkUpdateDto<T, ID> updated){
         return ResponseEntity.ok(getCommandService().bulkUpdateFields(updated.getIds(), updated.getUpdated()));
     }
@@ -60,7 +60,7 @@ public abstract class RestfulController<T, Q, ID> {
         return ResponseEntity.ok("Ok");
     }
 
-    @DeleteMapping("/")
+    @DeleteMapping("")
     public ResponseEntity<String> delete(@RequestBody List<ID> ids){
         getCommandService().bulkDelete(ids);
         return ResponseEntity.ok("Ok");

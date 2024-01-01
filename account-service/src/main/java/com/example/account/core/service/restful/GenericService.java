@@ -1,16 +1,17 @@
 package com.example.account.core.service.restful;
 
 import java.lang.reflect.Type;
+import java.util.function.BiConsumer;
 
-import com.example.account.core.dao.QueryExecutor;
-import com.example.account.core.dao.QuerydslExecutor;
-import com.querydsl.jpa.impl.JPAQueryFactory;
+import javax.persistence.Id;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ResolvableType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.util.ReflectionUtils;
 
 import lombok.Getter;
 
@@ -23,7 +24,8 @@ public abstract class GenericService<T, E, ID> {
     @Qualifier("notNullModelMapper")
     private ModelMapper notNullModelMapper;
 
-    private QueryExecutor<E, ?> executor;
+    @Autowired
+    private JpaSpecificationExecutor<E> executor;
 
     private ModelMapper modelMapper;
 
@@ -31,19 +33,11 @@ public abstract class GenericService<T, E, ID> {
 
     private Class<E> entityClass;
 
-    @Autowired
-    public void setExecutor(JPAQueryFactory factory) {
-        this.executor = new QuerydslExecutor<E>() {
-            @Override
-            public JPAQueryFactory getFactory() {
-                return factory;
-            }
 
-            @Override
-            public Class<E> getEntityClass() {
-                return GenericService.this.getEntityClass();
-            }
-        };
+    private BiConsumer<E, ID> entityIdSetter;
+
+    public final void setEntityId(E entity, ID id) {
+        this.entityIdSetter.accept(entity, id);
     }
 
     @Autowired
@@ -52,10 +46,20 @@ public abstract class GenericService<T, E, ID> {
         this.modelMapper = modelMapper;
         this.dtoClass = getGenericClass(0);
         this.entityClass = getGenericClass(1);
+        ReflectionUtils.doWithFields(this.entityClass, field -> {
+            if (field.getAnnotation(Id.class) != null) {
+                this.entityIdSetter = (entity, id) -> {
+                    try {
+                        field.set(entity, id);
+                    } catch (IllegalArgumentException | IllegalAccessException e) {
+                    }
+                };
+            }
+        });
     }
 
     public T toDto(E t) {
-        return getModelMapper().map(t, (Type) getDtoClass());
+        return getModelMapper().map(t, (Type) dtoClass);
     }
 
     public E toEntity(T b) {

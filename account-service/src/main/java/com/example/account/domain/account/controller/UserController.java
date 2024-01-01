@@ -4,7 +4,7 @@ import com.example.account.core.dto.BaseUserDto;
 import com.example.account.core.security.JwtTokenProvider;
 import com.example.account.domain.account.dto.TokenDto;
 import com.example.account.domain.account.dto.UserDto;
-import com.example.account.domain.account.dto.UserSpecification;
+import com.example.account.domain.account.dto.UserQueryParam;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.csrf.CsrfToken;
@@ -21,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user")
-public class UserController extends RestfulController<UserDto, UserSpecification, Long>{
+public class UserController extends RestfulController<UserDto, UserQueryParam, Long>{
     private final JwtTokenProvider jwtTokenProvider;
     
     @GetMapping("/csrf")

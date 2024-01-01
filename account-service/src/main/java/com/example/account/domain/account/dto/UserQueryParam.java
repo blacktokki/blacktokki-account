@@ -1,13 +1,10 @@
 package com.example.account.domain.account.dto;
 
-import java.io.Serializable;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 @Data
-@EqualsAndHashCode(callSuper = false)
-public class UserSpecification implements Serializable{
+public class UserQueryParam{
     private String name;
     private String username;
     private Long groupId;
