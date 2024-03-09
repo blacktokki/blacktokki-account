@@ -19,6 +19,12 @@ public interface JpaCommandService<T, E, ID> extends CommandService<T, ID> {
 
     @Override
     @Transactional
+    default T create(T newDomain){
+        return toDto(getRepository().save(toEntity(newDomain)));
+    }
+
+    @Override
+    @Transactional
     default T update(ID id, T updated){
         E entity = toEntity(updated);
         setEntityId(entity, id);
@@ -35,18 +41,6 @@ public interface JpaCommandService<T, E, ID> extends CommandService<T, ID> {
         }
         getRepository().saveAll(entityList);
         return updated;
-    }
-
-    @Override
-    @Transactional
-    default T create(T newDomain){
-        return toDto(getRepository().save(toEntity(newDomain)));
-    }
-
-    @Override
-    @Transactional
-    default void delete(ID id){
-        getRepository().deleteById(id);
     }
 
     @Override

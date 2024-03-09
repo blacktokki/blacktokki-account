@@ -1,6 +1,7 @@
 package com.example.account.core.service.restful;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.example.account.core.dto.PageResponseDto;
 
@@ -12,5 +13,5 @@ public interface QueryService<T, ID> {
 
     public List<T> getList(Object param, Sort sort);
 
-    public T get(ID id);
+    public Optional<T> getOptional(ID id);
 }

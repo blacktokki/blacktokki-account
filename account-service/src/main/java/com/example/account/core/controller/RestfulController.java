@@ -1,5 +1,6 @@
 package com.example.account.core.controller;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.example.account.core.dto.BulkUpdateDto;
@@ -36,7 +37,7 @@ public abstract class RestfulController<T, Q, ID> {
 
     @GetMapping("/{id}")
     public ResponseEntity<T> getOne(@PathVariable ID id){
-        return ResponseEntity.ok(getQueryService().get(id));
+        return getQueryService().getOptional(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("")
@@ -56,7 +57,7 @@ public abstract class RestfulController<T, Q, ID> {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable ID id){
-        getCommandService().delete(id);
+        getCommandService().bulkDelete(Arrays.asList(id));
         return ResponseEntity.ok("Ok");
     }
 

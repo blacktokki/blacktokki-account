@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -33,8 +34,8 @@ public interface JpaQueryService<T, E, ID> extends QueryService<T, ID> {
     public T toDto(E e);
 
     @Override
-    default T get(ID id) {
-        return toDto(getRepository().findById(id).get());
+    default Optional<T> getOptional(ID id) {
+        return Optional.ofNullable(getRepository().findById(id).map(this::toDto).orElse(null));
     }
 
     @Override
