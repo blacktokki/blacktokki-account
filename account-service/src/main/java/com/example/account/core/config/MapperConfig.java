@@ -15,6 +15,7 @@ public class MapperConfig {
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        // .setCollectionsMergeEnabled(false)
         modelMapper.registerModule(customJsr310Module);
         return modelMapper;
     }
@@ -23,6 +24,7 @@ public class MapperConfig {
     public ModelMapper notNullModelMapper() {
         ModelMapper notNullModelMapper = new ModelMapper();
         notNullModelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
+        // .setCollectionsMergeEnabled(false)
         notNullModelMapper.registerModule(customJsr310Module);
         return notNullModelMapper;
     }
