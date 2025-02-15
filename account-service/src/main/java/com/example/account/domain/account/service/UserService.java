@@ -117,7 +117,7 @@ public class UserService extends RestfulService<UserDto, User, Long> implements 
         Join<User, Group> g = root.join("groupList", JoinType.LEFT);
         if (key.equals("self") && (Boolean)value){
             String username = ((BaseUserDto)SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-            return builder.equal(root.get(key), username);
+            return builder.equal(root.get("username"), username);
         }
         if (key.equals("groupId")){
             return builder.equal(g.get(key), value);

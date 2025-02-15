@@ -24,11 +24,13 @@ import lombok.RequiredArgsConstructor;
 public class UserController extends RestfulController<UserDto, UserQueryParam, Long>{
     private final JwtTokenProvider jwtTokenProvider;
     
+    @Deprecated
     @GetMapping("/csrf")
     public String csrf(final CsrfToken token) {
         return token.getToken();
     }
 
+    @Deprecated
     @GetMapping("/sso/token")
     public String token(Authentication authentication){
         return jwtTokenProvider.createToken(((BaseUserDto) authentication.getPrincipal()).getUsername(), null, null);

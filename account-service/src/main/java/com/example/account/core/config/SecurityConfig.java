@@ -65,8 +65,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .and()
             // csrf 사용유무 설정
             // csrf 설정을 사용하면 모든 request에 csrf 값을 함께 전달해야한다.
-            .csrf().ignoringAntMatchers("/api/v1/**")
-        .and()
+            .csrf().disable()
             // 로그인 프로세스가 진행될 provider
             .authenticationProvider(authenticationProvider())
             .exceptionHandling().accessDeniedHandler(customAccessDeniedHandler)
@@ -83,6 +82,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         config.setAllowCredentials(true);
         config.setAllowedOrigins(Arrays.asList("http://localhost:19006", "http://localhost:9000", "https://blacktokki.github.io"));
         config.setMaxAge(1800L);
+        config.setExposedHeaders(Arrays.asList("Authorization"));
         source.registerCorsConfiguration("/**", config);
         return source;
     }
