@@ -19,5 +19,5 @@ LOCATION="classpath:db/migration/account"
 
 rm -rf ./account-service/build/resources/main/db
 cp -r ./account-service/src/main/resources/db ./account-service/build/resources/main
-./gradlew flyway$1 "-i" "-Dflyway.user=$USER" "-Dflyway.password=$PASSWORD" "-Dflyway.url=$URL" "-Dflyway.locations=$LOCATION" "-Dflyway.schemas=db1_account"
+./gradlew -p account-service flyway$1 "-i" "-Dflyway.user=$USER" "-Dflyway.password=$PASSWORD" "-Dflyway.url=$URL" "-Dflyway.locations=$LOCATION" "-Dflyway.schemas=db1_account"
 # read -p "Press enter to continue"
