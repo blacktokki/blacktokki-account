@@ -47,7 +47,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
             .antMatchers(resourceArray).permitAll()
             .antMatchers("/**/csrf/").permitAll()
-            .antMatchers("/**/sso/refresh/").permitAll()
+            .antMatchers("/**/token/refresh/").permitAll()
             .anyRequest().authenticated()
         .and()
             // 로그인 페이지 및 성공 url, handler 그리고 로그인 시 사용되는 id, password 파라미터 정의
