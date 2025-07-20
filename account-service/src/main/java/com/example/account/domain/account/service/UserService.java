@@ -57,6 +57,19 @@ public class UserService extends RestfulService<UserDto, User, Long> implements 
 
     @Override
     @Transactional
+    public AuthenticateDto createOauthUser(String username, String name){
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode("oauth"));
+        user.setIsGuest(false);
+        user.setIsAdmin(false);
+        user.setName(name);
+        user = getRepository().save(user);
+        return getModelMapper().map(user, AuthenticateDto.class);
+    }
+
+    @Override
+    @Transactional
     public UserDto create(UserDto newUser) {
         String password = newUser.getPassword();
         newUser.setPassword(passwordEncoder.encode(password));
