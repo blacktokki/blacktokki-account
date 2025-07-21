@@ -47,7 +47,7 @@ public class UserService extends RestfulService<UserDto, User, Long> implements 
     public AuthenticateDto createGuestUser(String username){
         User user = new User();
         user.setUsername(username);
-        user.setPassword(passwordEncoder.encode("guest"));
+        user.setPassword("");
         user.setIsGuest(true);
         user.setIsAdmin(true);
         user.setName("Guest" + new BigInteger(1, username.getBytes()).toString().substring(0, 4));
@@ -60,9 +60,9 @@ public class UserService extends RestfulService<UserDto, User, Long> implements 
     public AuthenticateDto createOauthUser(String username, String name){
         User user = new User();
         user.setUsername(username);
-        user.setPassword(passwordEncoder.encode("oauth"));
+        user.setPassword("");
         user.setIsGuest(false);
-        user.setIsAdmin(false);
+        user.setIsAdmin(true);
         user.setName(name);
         user = getRepository().save(user);
         return getModelMapper().map(user, AuthenticateDto.class);

@@ -7,6 +7,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+import java.util.UUID;
+
 import org.springframework.security.authentication.AuthenticationProvider;
 // import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,7 +17,6 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.WebAuthenticationDetails;
 
 @RequiredArgsConstructor
 public class AuthProvider implements AuthenticationProvider  {
@@ -32,15 +33,14 @@ public class AuthProvider implements AuthenticationProvider  {
         Boolean isGuestCreate = username.equals("guest") && password.equals("guest");
         UserDetails user = service.loadUserByUsername(username);
         if (isGuestCreate){
-            WebAuthenticationDetails details = (WebAuthenticationDetails)authentication.getDetails();
-            username = details.getSessionId().substring(0, 10) + "@*.guest";
+            username = UUID.randomUUID().toString().substring(0, 10) + "@*.guest";
             user =  service.loadUserByUsername(username);
             if(user == null){
                 user = service.createGuestUser(username);
             }  
         }
-        // id에 맞는 user가 없거나 비밀번호가 맞지 않는 경우.
-        if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
+        // id에 맞는 user가 없거나 user가 guest 또는 oauth 계정이거나 비밀번호가 맞지 않는 경우.
+        if (user == null || !isGuestCreate && (user.getPassword().isEmpty() || !passwordEncoder.matches(password, user.getPassword()))) {
         	throw new UsernameNotFoundException("Unregistered user or incorrect password.");
         }    
         return new UsernamePasswordAuthenticationToken(user, user.getPassword(), user.getAuthorities());
