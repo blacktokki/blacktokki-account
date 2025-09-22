@@ -38,4 +38,5 @@ out/
 
 **/datasource.properties
 **/secret.properties
+**/keystore.p12
 **/virtual-metrics-*.json
