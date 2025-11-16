@@ -13,6 +13,13 @@ do
   else
     # ./gradlew build -p $var-service
     echo "=====$var isn't running====="
-    nohup java -jar **/build/libs/$var-service*.war >/dev/null 2>&1 &
+    if [ "$var" == "discovery" ]; then
+        options="-Xmx32m"
+    elif [ "$var" == "account" ]; then
+        options="-Djava.security.egd=file:/dev/./urandom"
+    else
+	      options=""
+    fi
+    nohup java -jar $options -XX:TieredStopAtLevel=1 **/build/libs/$var-service*.war >/dev/null 2>&1 &
   fi
 done

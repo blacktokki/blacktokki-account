@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
@@ -33,10 +34,19 @@ public class JwtTokenProvider {
     
     private final UserDetailsService userDetailsService;
 
+    private JwtParser parser;
+
     // 객체 초기화, secretKey를 Base64로 인코딩한다.
     @PostConstruct
     protected void init() {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
+        parser = Jwts.parser().setSigningKey(secretKey);
+        // warmup 처리
+        try {
+            parser.parseClaimsJws("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ5ZGgwNTE1NDFAZ21haWwuY29tIiwib3JpZ19pYXQiOjE3NjIwODEwMjA2NjQsImlhdCI6MTc2MjA4MzU0NSwiZXhwIjoxNzYyMDg1MzQ1fQ.BZ7I_OsbcW12tTTF6bcrLXWpraih4hyA1mp54ddDglY");
+        } catch (Exception e) {
+        }
+        userDetailsService.loadUserByUsername("");
     }
 
     // JWT 토큰 생성 
@@ -56,7 +66,7 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String jwtToken) {
         try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(jwtToken);
+            Jws<Claims> claims = parser.parseClaimsJws(jwtToken);
             return !claims.getBody().getExpiration().before(new Date());
         } catch (Exception e) {
             return false;
@@ -64,16 +74,14 @@ public class JwtTokenProvider {
     }
 
     public Authentication getAuthentication(String token) {
-        String subject = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
+        String subject = parser.parseClaimsJws(token).getBody().getSubject();
         UserDetails userDetails = userDetailsService.loadUserByUsername(subject);
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
     public String createRefreshToken(String token) {
         try {
-            Jwts.parser()
-                .setSigningKey(secretKey) // Set Key
-                .parseClaimsJws(token); // 파싱 및 검증, 실패 시 에러
+            parser.parseClaimsJws(token); // 파싱 및 검증, 실패 시 에러
         } catch (ExpiredJwtException e) { // 토큰이 만료되었을 경우
             Claims claims = e.getClaims();
             long origIat = (long)claims.get("orig_iat");
