@@ -12,6 +12,7 @@ import org.springframework.security.web.authentication.SavedRequestAwareAuthenti
 import org.springframework.stereotype.Component;
 
 import com.example.account.core.dto.BaseUserDto;
+import com.example.account.core.service.VisitService;
 
 import lombok.RequiredArgsConstructor;
  
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
 	private final JwtTokenProvider jwtTokenProvider;
+	private final VisitService visitService;
 
 	private final Logger logger = Logger.getGlobal();
 
@@ -33,10 +35,10 @@ public class AuthSuccessHandler extends SavedRequestAwareAuthenticationSuccessHa
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
             Authentication authentication) throws ServletException, IOException {
     	logger.info("login success");
-    	// userService.clearFailureCount(LoginUser.getId());
-    	// userService.visit(LoginUser.getId());
     	super.onAuthenticationSuccess(request, response, authentication);
-		String token = jwtTokenProvider.createToken(((BaseUserDto) authentication.getPrincipal()).getUsername(), null, null);
+		BaseUserDto baseUserDto = ((BaseUserDto) authentication.getPrincipal());
+		visitService.visit(baseUserDto.getUsername());
+		String token = jwtTokenProvider.createToken(baseUserDto.getUsername(), null, null);
 		response.addHeader("Authorization", "JWT " + token);
     }
  

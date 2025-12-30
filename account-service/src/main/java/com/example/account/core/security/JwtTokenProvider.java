@@ -46,7 +46,10 @@ public class JwtTokenProvider {
             parser.parseClaimsJws("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ5ZGgwNTE1NDFAZ21haWwuY29tIiwib3JpZ19pYXQiOjE3NjIwODEwMjA2NjQsImlhdCI6MTc2MjA4MzU0NSwiZXhwIjoxNzYyMDg1MzQ1fQ.BZ7I_OsbcW12tTTF6bcrLXWpraih4hyA1mp54ddDglY");
         } catch (Exception e) {
         }
-        userDetailsService.loadUserByUsername("");
+        try {
+            userDetailsService.loadUserByUsername("");
+        } catch (Exception e) {
+        }
     }
 
     // JWT 토큰 생성 

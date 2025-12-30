@@ -2,6 +2,7 @@ package com.example.account.domain.account.controller;
 
 import com.example.account.core.security.JwtTokenProvider;
 import com.example.account.core.service.CustomUserDetailsService;
+import com.example.account.core.service.VisitService;
 import com.example.account.domain.account.dto.TokenDto;
 import com.example.account.domain.account.dto.UserDto;
 import com.example.account.domain.account.dto.UserQueryParam;
@@ -33,6 +34,8 @@ public class UserController extends RestfulController<UserDto, UserQueryParam, L
     private final JwtTokenProvider jwtTokenProvider;
 
     private final CustomUserDetailsService service;
+
+    private final VisitService visitService;
     
     @Value("${spring.security.oauth2.client.registration.google.client-id}")
     private String googleClientId;
@@ -49,11 +52,11 @@ public class UserController extends RestfulController<UserDto, UserQueryParam, L
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         String username = payload.getEmail();
-        UserDetails user =  service.loadUserByUsername(username);
+        UserDetails user = service.loadUserByUsername(username);
         if(user == null){
             user = service.createOauthUser(username, (String) payload.get("name"));
-        } 
-        System.out.println(username);
+        }
+        visitService.visit(user.getUsername());
         return ResponseEntity.ok(jwtTokenProvider.createToken(username, null, null));
     }
 
