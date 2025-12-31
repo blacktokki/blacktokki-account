@@ -4,5 +4,6 @@ import lombok.Data;
 
 @Data
 public class OtpVerificationDto {
+    private String secretKey;
     private int code;
 }

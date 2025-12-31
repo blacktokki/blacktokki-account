@@ -81,20 +81,24 @@ public class OtpService implements VisitService {
             GoogleAuthenticatorKey key = gAuth.createCredentials();
             String qrUrl = GoogleAuthenticatorQRGenerator.getOtpAuthTotpURL(ISSUR, user.getUsername(), key);
             String userKey = key.getKey();
-            
             response.setSecretKey(userKey);
             response.setOtpAuthUrl(qrUrl);
-            userRepository.updateOtpStatus(user.getId(), encrypt(userKey), false);
-        }
-        else {
-            userRepository.updateOtpStatus(user.getId(), user.getOtpSecret(), false);
         }
         return response;
     }
 
     public boolean verifyOtp(OtpVerificationDto request) {
         User user =  getUser();
-        return gAuth.authorize(decrypt(user.getOtpSecret()), request.getCode());
+        if (request.getSecretKey() != null) {
+            Boolean result = gAuth.authorize(request.getSecretKey(), request.getCode());
+            if (result) {
+                userRepository.updateOtpStatus(user.getId(), request.getSecretKey(), false);
+            }
+            return result;
+        }
+        else {
+            return gAuth.authorize(decrypt(user.getOtpSecret()), request.getCode());
+        }
     }
 
     public void delete() {
