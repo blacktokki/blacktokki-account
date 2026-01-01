@@ -28,11 +28,11 @@ public class OtpController {
         if (isAuthorized) {
             return ResponseEntity.ok().build();
         } else {
-            return ResponseEntity.status(401).build();
+            return ResponseEntity.status(403).build();
         }
     }
 
-    @DeleteMapping("/")
+    @DeleteMapping("")
     public ResponseEntity<String> delete() {
         otpService.delete();
         return ResponseEntity.status(204).build();

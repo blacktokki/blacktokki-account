@@ -13,6 +13,9 @@ import com.warrenstrange.googleauth.GoogleAuthenticatorQRGenerator;
 
 import lombok.RequiredArgsConstructor;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Base64;
 
 import javax.annotation.PostConstruct;
@@ -21,6 +24,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +46,14 @@ public class OtpService implements VisitService {
 
     @PostConstruct
     private void init(){
-        keySpec = new SecretKeySpec(secretKey.getBytes(), "AES");
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] keyBytes = digest.digest(secretKey.getBytes());
+            keySpec = new SecretKeySpec(keyBytes, "AES");
+        }
+        catch (NoSuchAlgorithmException e) {
+           throw new RuntimeException("SHA-256 algorithm not found", e);
+        }
     }
 
     private String encrypt(String plainText) {
@@ -56,7 +67,6 @@ public class OtpService implements VisitService {
         }
     }
 
-    // 복호화: Base64 암호문 -> 평문
     private String decrypt(String cipherText) {
         try {
             Cipher cipher = Cipher.getInstance(algorithm);
@@ -74,10 +84,11 @@ public class OtpService implements VisitService {
         return userRepository.getById(baseUserDto.getId());
     }
 
+    @Transactional(readOnly = true)
     public OtpResponseDto getQrCodeUrl() {
-        User user =  getUser();
+        User user = getUser();
         OtpResponseDto response = new OtpResponseDto();
-        if (user.getOtpSecret() == null) {
+        if (user != null && user.getOtpSecret() == null) {
             GoogleAuthenticatorKey key = gAuth.createCredentials();
             String qrUrl = GoogleAuthenticatorQRGenerator.getOtpAuthTotpURL(ISSUR, user.getUsername(), key);
             String userKey = key.getKey();
@@ -87,12 +98,13 @@ public class OtpService implements VisitService {
         return response;
     }
 
+    @Transactional
     public boolean verifyOtp(OtpVerificationDto request) {
         User user =  getUser();
         if (request.getSecretKey() != null) {
             Boolean result = gAuth.authorize(request.getSecretKey(), request.getCode());
             if (result) {
-                userRepository.updateOtpStatus(user.getId(), request.getSecretKey(), false);
+                userRepository.updateOtpStatus(user.getId(), encrypt(request.getSecretKey()), false);
             }
             return result;
         }
@@ -101,15 +113,17 @@ public class OtpService implements VisitService {
         }
     }
 
+    @Transactional
     public void delete() {
-        User user =  getUser();
+        User user = getUser();
         userRepository.updateOtpStatus(user.getId(), user.getOtpSecret(), true);
     }
 
     @Override
+    @Transactional
     public void visit(String username) {
         User user = userRepository.findByUsername(username);
-        if (user.getOtpDeletionRequested()) {
+        if (Boolean.TRUE.equals(user.getOtpDeletionRequested())) {
             userRepository.updateOtpStatus(user.getId(), null, null);
         }
     }
