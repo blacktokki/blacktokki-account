@@ -38,7 +38,7 @@ public class AuthSuccessHandler extends SavedRequestAwareAuthenticationSuccessHa
     	super.onAuthenticationSuccess(request, response, authentication);
 		BaseUserDto baseUserDto = ((BaseUserDto) authentication.getPrincipal());
 		visitService.visit(baseUserDto.getUsername());
-		String token = jwtTokenProvider.createToken(baseUserDto.getUsername(), null, null);
+		String token = jwtTokenProvider.createToken(baseUserDto.getUsername(), null);
 		response.addHeader("Authorization", "JWT " + token);
     }
  
