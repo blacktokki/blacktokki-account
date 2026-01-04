@@ -7,6 +7,7 @@ import com.example.account.domain.account.dto.OtpResponseDto;
 import com.example.account.domain.account.dto.OtpVerificationDto;
 import com.example.account.domain.account.entity.User;
 import com.example.account.domain.account.repository.UserRepository;
+import com.example.account.core.security.JwtTokenProvider;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
 import com.warrenstrange.googleauth.GoogleAuthenticatorQRGenerator;
@@ -15,8 +16,9 @@ import lombok.RequiredArgsConstructor;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.Cipher;
@@ -43,6 +45,8 @@ public class OtpService implements VisitService {
     private final String algorithm = "AES";
 
     private SecretKeySpec keySpec;
+
+    private final JwtTokenProvider jwtTokenProvider;
 
     @PostConstruct
     private void init(){
@@ -99,18 +103,22 @@ public class OtpService implements VisitService {
     }
 
     @Transactional
-    public boolean verifyOtp(OtpVerificationDto request) {
+    public String verifyOtp(OtpVerificationDto request) {
         User user =  getUser();
+        Boolean result;
         if (request.getSecretKey() != null) {
-            Boolean result = gAuth.authorize(request.getSecretKey(), request.getCode());
+            result = gAuth.authorize(request.getSecretKey(), request.getCode());
             if (result) {
                 userRepository.updateOtpStatus(user.getId(), encrypt(request.getSecretKey()), false);
             }
-            return result;
         }
         else {
-            return gAuth.authorize(decrypt(user.getOtpSecret()), request.getCode());
+            result = gAuth.authorize(decrypt(user.getOtpSecret()), request.getCode());
         }
+        if (result) {
+            return jwtTokenProvider.createToken(user.getUsername() , List.of("otp_once", "otp"));
+        }
+        return null;
     }
 
     @Transactional

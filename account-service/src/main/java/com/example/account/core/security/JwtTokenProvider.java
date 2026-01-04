@@ -2,6 +2,8 @@ package com.example.account.core.security;
 
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
+import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
 
@@ -29,6 +31,9 @@ public class JwtTokenProvider {
     // 토큰 유효시간 30분
     private long tokenValidTime = 30 * 60 * 1000L;
 
+    // 토큰 유효시간 (otp 포함)
+    private long otpTokenValidTime = 30 * 1000L;
+
     // refresh 토큰 유효시간 7일
     private long refreshTokenValidTime = 7 * 24 * 3600 * 1000L;
     
@@ -53,15 +58,15 @@ public class JwtTokenProvider {
     }
 
     // JWT 토큰 생성 
-    public String createToken(String username, Object roles, Date origIat) {
+    public String createToken(String username, List<?> roles) {
         Claims claims = Jwts.claims().setSubject(username); // JWT payload 에 저장되는 정보단위, 보통 여기서 user를 식별하는 값을 넣는다.
         Date now = new Date();
-        claims.put("roles", roles); // 정보는 key / value 쌍으로 저장된다.
-        claims.put("orig_iat", (origIat!=null?origIat:now).getTime());
+        Boolean hasOtpOnce = roles != null && roles.contains("otp_once");
+        claims.put("roles", roles);
         return Jwts.builder()
                 .setClaims(claims) // 정보 저장
                 .setIssuedAt(now) // 토큰 발행 시간 정보
-                .setExpiration(new Date(now.getTime() + tokenValidTime)) // set Expire Time
+                .setExpiration(new Date(now.getTime() + (hasOtpOnce ? otpTokenValidTime : tokenValidTime))) // set Expire Time
                 .signWith(SignatureAlgorithm.HS256, secretKey)  // 사용할 암호화 알고리즘과
                 // signature 에 들어갈 secret값 세팅
                 .compact();
@@ -82,17 +87,26 @@ public class JwtTokenProvider {
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
+    private String createRefreshToken(Claims claims) {
+        long iat = claims.getIssuedAt().getTime();
+        Date now = new Date();
+        Date expire = new Date(iat + refreshTokenValidTime);
+        List<String> roles = new ArrayList<>(claims.get("roles", List.class));
+        if (roles.contains("otp_once")) {
+            roles.remove("otp_once");
+        }
+        if (now.before(expire)){
+            return createToken(claims.getSubject(), roles);
+        }
+        return "";
+    }
+
     public String createRefreshToken(String token) {
         try {
-            parser.parseClaimsJws(token); // 파싱 및 검증, 실패 시 에러
-        } catch (ExpiredJwtException e) { // 토큰이 만료되었을 경우
-            Claims claims = e.getClaims();
-            long origIat = (long)claims.get("orig_iat");
-            Date now = new Date();
-            Date expire = new Date(origIat + refreshTokenValidTime);
-            if (now.before(expire)){
-                return createToken(claims.getSubject(), claims.get("roles"), new Date(origIat));
-            }
+            Claims claims = parser.parseClaimsJws(token).getBody();
+            return createRefreshToken(claims);
+        } catch (ExpiredJwtException e) {
+            return createRefreshToken(e.getClaims());
         } catch (Exception e) {
         }
         return "";

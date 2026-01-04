@@ -57,7 +57,7 @@ public class UserController extends RestfulController<UserDto, UserQueryParam, L
             user = service.createOauthUser(username, (String) payload.get("name"));
         }
         visitService.visit(user.getUsername());
-        return ResponseEntity.ok(jwtTokenProvider.createToken(username, null, null));
+        return ResponseEntity.ok(jwtTokenProvider.createToken(username, null));
     }
 
     private GoogleIdToken.Payload verifyIdToken(String idTokenString) {

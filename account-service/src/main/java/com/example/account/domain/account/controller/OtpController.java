@@ -23,13 +23,7 @@ public class OtpController {
 
     @PostMapping("/verify")
     public ResponseEntity<String> verifyOtp(@RequestBody OtpVerificationDto request) {
-        boolean isAuthorized = otpService.verifyOtp(request);
-
-        if (isAuthorized) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.status(403).build();
-        }
+        return ResponseEntity.ok(otpService.verifyOtp(request));
     }
 
     @DeleteMapping("")
