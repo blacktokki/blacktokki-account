@@ -3,6 +3,7 @@ package com.example.account.core.security;
 import java.util.Base64;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
@@ -87,26 +88,26 @@ public class JwtTokenProvider {
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
-    private String createRefreshToken(Claims claims) {
+    private String createRefreshToken(Claims claims, Boolean resetRoles) {
         long iat = claims.getIssuedAt().getTime();
         Date now = new Date();
         Date expire = new Date(iat + refreshTokenValidTime);
-        List<String> roles = new ArrayList<>(claims.get("roles", List.class));
+        List<?> roles = new ArrayList<>(Optional.ofNullable((List<?>)claims.get("roles", List.class)).orElse(List.of()));
         if (roles.contains("otp_once")) {
             roles.remove("otp_once");
         }
         if (now.before(expire)){
-            return createToken(claims.getSubject(), roles);
+            return createToken(claims.getSubject(), Optional.ofNullable(resetRoles).orElse(false) ? null : roles);
         }
         return "";
     }
 
-    public String createRefreshToken(String token) {
+    public String createRefreshToken(String token, Boolean resetRoles) {
         try {
             Claims claims = parser.parseClaimsJws(token).getBody();
-            return createRefreshToken(claims);
+            return createRefreshToken(claims, resetRoles);
         } catch (ExpiredJwtException e) {
-            return createRefreshToken(e.getClaims());
+            return createRefreshToken(e.getClaims(), resetRoles);
         } catch (Exception e) {
         }
         return "";

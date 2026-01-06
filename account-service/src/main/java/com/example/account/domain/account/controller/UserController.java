@@ -42,7 +42,7 @@ public class UserController extends RestfulController<UserDto, UserQueryParam, L
 
     @PostMapping("/token/refresh")
     public String refreshToken(@RequestBody TokenDto tokenDto){
-        return jwtTokenProvider.createRefreshToken(tokenDto.getToken());
+        return jwtTokenProvider.createRefreshToken(tokenDto.getToken(), tokenDto.getResetRoles());
     }
 
     @PostMapping("/google")
