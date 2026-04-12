@@ -18,4 +18,9 @@ public class UserDto extends BaseUserDto{
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Boolean otpDeletionRequested;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Boolean getIsOauth() {
+        return password != null && password.isBlank();
+    };
 }
