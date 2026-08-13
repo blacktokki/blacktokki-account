@@ -99,7 +99,7 @@ public class JwtTokenProvider {
         if (now.before(expire)){
             return createToken(claims.getSubject(), Optional.ofNullable(resetRoles).orElse(false) ? null : roles);
         }
-        return "";
+        return null;
     }
 
     public String createRefreshToken(String token, Boolean resetRoles) {
@@ -110,6 +110,6 @@ public class JwtTokenProvider {
             return createRefreshToken(e.getClaims(), resetRoles);
         } catch (Exception e) {
         }
-        return "";
+        return null;
     }
 }

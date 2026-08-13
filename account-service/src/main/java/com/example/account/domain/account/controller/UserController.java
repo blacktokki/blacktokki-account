@@ -41,8 +41,12 @@ public class UserController extends RestfulController<UserDto, UserQueryParam, L
     private String googleClientId;
 
     @PostMapping("/token/refresh")
-    public String refreshToken(@RequestBody TokenDto tokenDto){
-        return jwtTokenProvider.createRefreshToken(tokenDto.getToken(), tokenDto.getResetRoles());
+    public ResponseEntity<String> refreshToken(@RequestBody TokenDto tokenDto){
+        String token = jwtTokenProvider.createRefreshToken(tokenDto.getToken(), tokenDto.getResetRoles());
+        if (token == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(token);
     }
 
     @PostMapping("/google")
