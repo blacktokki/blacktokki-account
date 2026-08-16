@@ -1,0 +1,78 @@
+spring:
+  output:
+    ansi:
+      enabled: always
+  main:
+    lazy-initialization: false
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        # select batch
+        default_batch_fetch_size: 1000
+        # create batch
+        jdbc:
+          batch_size: 1000
+        order_inserts: true
+        order_updates: true
+      application-name: account
+    # # mysql 사용
+    database: mysql
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    open-in-view: false
+
+  config:
+    import: classpath:secret.yaml
+
+  devtools:
+    restart:
+      additional-exclude: db/migration/**
+
+  flyway:
+    enabled: false
+    locations: classpath:db/migration/${spring.jpa.properties.application-name}
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      catalog: db1_${spring.jpa.properties.application-name}
+      maximum-pool-size: 3
+      minimum-idle: 3
+      keepalive-time: 120000
+      max-lifetime: 1800000
+
+  mvc:
+    servlet:
+      load-on-startup: 1
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+  application:
+    name: account
+
+  cloud:
+    gcp:
+      storage:
+        credentials:
+          location: classpath:virtual-metrics-355712-e207b739a975.json
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 252515856483-7ko6lgc5sk3ccq46h8adovbejqsgbi65.apps.googleusercontent.com
+
+eureka:
+  instance:
+    # prefer-ip-address: false
+    hostname: localhost
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+
+# logging.level.org.springframework: TRACE
