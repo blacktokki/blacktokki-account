@@ -41,3 +41,4 @@ out/
 **/secret.yaml
 **/keystore.p12
 **/virtual-metrics-*.json
+**/gateway-access*
