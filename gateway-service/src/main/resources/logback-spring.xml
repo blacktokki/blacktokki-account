@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- 기본 콘솔 출력 설정 -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+
+    <!-- Spring 환경설정(YAML / properties)의 logging.access-log.path 값을 읽어옴 (기본값: logs) -->
+    <springProperty scope="context" name="ACCESS_LOG_PATH" source="logging.access-log.path" defaultValue="logs"/>
+
+    <!-- Netty HTTP Access Log 전용 롤링 파일 Appender -->
+    <appender name="ACCESS_LOG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${ACCESS_LOG_PATH}/gateway-access.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${ACCESS_LOG_PATH}/gateway-access.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>3GB</totalSizeCap>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Netty AccessLog 로거: 해당 파일에만 단독 기록 (additivity="false") -->
+    <logger name="reactor.netty.http.server.AccessLog" level="INFO" additivity="false">
+        <appender-ref ref="ACCESS_LOG_FILE" />
+    </logger>
+
+    <!-- 루트 로거 (기본 콘솔 출력) -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+</configuration>

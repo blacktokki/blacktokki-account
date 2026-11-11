@@ -17,9 +17,11 @@ do
         options="-Xmx32m"
     elif [ "$var" == "account" ]; then
         options="-Djava.security.egd=file:/dev/./urandom"
+    elif [ "$var" == "gateway" ]; then
+        options="-Dreactor.netty.http.server.accessLogEnabled=true"
     else
 	      options=""
     fi
-    nohup java -jar $options -XX:TieredStopAtLevel=1 **/build/libs/$var-service*.war >/dev/null 2>&1 &
+    nohup java $options -XX:TieredStopAtLevel=1 -jar **/build/libs/$var-service*.war >/dev/null 2>&1 &
   fi
 done
